@@ -1,4 +1,4 @@
-import React, { Fragment } from 'react';
+import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import PropTypes from 'prop-types';
 
@@ -11,14 +11,14 @@ const Content = ({ children, iterate }) => {
 
   if (iterate) {
     return (
-      <Fragment>
+      <>
         {children.map((child, index) => (
           // eslint-disable-next-line react/no-array-index-key
           <View style={styles.content} key={index}>
             {child}
           </View>
         ))}
-      </Fragment>
+      </>
     );
   }
 

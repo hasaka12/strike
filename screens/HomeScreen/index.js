@@ -1,32 +1,18 @@
-import React, { memo, useCallback } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
-import { StyleSheet, Text, View, ScrollView, Dimensions } from 'react-native';
-import { Body, Card, CardItem, Left, Thumbnail } from 'native-base';
-import { Video } from 'expo-av';
-import { useFocusEffect } from '@react-navigation/native';
+import { StyleSheet, Text, View, ScrollView, Platform } from 'react-native';
+import { Body, Card, CardItem } from 'native-base';
+import { useDispatch } from 'react-redux';
+import { HeaderButtons, Item } from 'react-navigation-header-buttons';
 
-import MAIN_VIDEO from '../../assets/mainVideo.mp4';
-import MAIN_CARD_IMG from '../../images/main-menu-thumb.png';
-
-import { MENU_ITEMS } from './constant';
-
-const { height } = Dimensions.get('screen');
+import HeaderButton from '../../components/HeaderButton';
+import * as authActions from '../../store/actions/auth';
 
 const styles = StyleSheet.create({
   container: { justifyContent: 'center' },
   cardContainer: {
     justifyContent: 'center',
     marginTop: '30%',
-  },
-  backgroundVideo: {
-    height,
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    alignItems: 'stretch',
-    bottom: 0,
-    right: 0,
-    opacity: 0.7,
   },
   menuContainer: {
     flex: 1,
@@ -41,76 +27,68 @@ const styles = StyleSheet.create({
   },
 });
 
-let videoplayer = null;
-
-const BackgroundVideo = memo(() => (
-  <Video
-    source={MAIN_VIDEO}
-    rate={1.0}
-    volume={0.5}
-    resizeMode="cover"
-    shouldPlay
-    isLooping
-    isMuted
-    style={styles.backgroundVideo}
-    ref={ref => {
-      videoplayer = ref;
-    }}
-  />
-));
-
 const HomeScreen = ({ navigation }) => {
-  const onPressMenu = menu => {
-    if (
-      (menu.navTo === 'Our Story' || menu.navTo === 'Our Gallery') &&
-      videoplayer
-    ) {
-      videoplayer.pauseAsync();
-    }
-
-    navigation.navigate(menu.navTo);
-  };
-
-  useFocusEffect(
-    useCallback(() => {
-      videoplayer.playAsync();
-    }, []),
-  );
+  const dispatch = useDispatch();
 
   return (
     <View style={styles.container}>
-      <BackgroundVideo />
-      <View style={styles.cardContainer}>
-        <Card>
-          <CardItem>
-            <Left>
-              <Thumbnail source={MAIN_CARD_IMG} />
-              <Body>
-                <Text style={styles.menuText}>Happy Birthday</Text>
-              </Body>
-            </Left>
-          </CardItem>
-        </Card>
-      </View>
       <ScrollView showsVerticalScrollIndicator={false}>
+        <Text>Home screen</Text>
         <View style={styles.menuContainer}>
-          {MENU_ITEMS.map(menu => (
-            <Card key={menu.key} style={styles.menuCard}>
-              <CardItem button onPress={() => onPressMenu(menu)}>
-                <Left>
-                  <Thumbnail source={menu.img} />
-                  <Body>
-                    <Text style={styles.menuText}>{menu.description}</Text>
-                  </Body>
-                </Left>
-              </CardItem>
-            </Card>
-          ))}
+          <Card style={styles.menuCard}>
+            <CardItem
+              button
+              onPress={() => {
+                navigation.navigate('Screen 3');
+              }}
+            >
+              <Body>
+                <Text style={styles.menuText}>Screen 3</Text>
+              </Body>
+            </CardItem>
+          </Card>
+          <Card style={styles.menuCard}>
+            <CardItem
+              button
+              onPress={() => {
+                dispatch(authActions.logout());
+              }}
+            >
+              <Body>
+                <Text style={styles.menuText}>Signout</Text>
+              </Body>
+            </CardItem>
+          </Card>
         </View>
       </ScrollView>
     </View>
   );
 };
+
+export const screenOptions = navData => ({
+  headerTitle: 'Home',
+  headerLeft: () => (
+    <HeaderButtons HeaderButtonComponent={HeaderButton}>
+      <Item
+        title="Menu"
+        iconName={Platform.OS === 'android' ? 'md-menu' : 'ios-menu'}
+        onPress={() => {
+          navData.navigation.toggleDrawer();
+        }}
+      />
+    </HeaderButtons>
+  ),
+  headerRight: () => (
+    <HeaderButtons HeaderButtonComponent={HeaderButton}>
+      <Item
+        title="Cart"
+        iconName={Platform.OS === 'android' ? 'md-cart' : 'ios-cart'}
+        onPress={() => {}}
+      />
+    </HeaderButtons>
+  ),
+});
+
 HomeScreen.propTypes = {
   navigation: PropTypes.object.isRequired,
 };
